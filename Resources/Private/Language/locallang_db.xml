@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<T3locallang>
+	<meta type="array">
+		<type>database</type>
+		<description>Language labels for database tables/fields belonging to extension 'tw_googleanalytics'</description>
+	</meta>
+	<data type="array">
+		<languageKey index="default" type="array">
+			<label index="features">Features</label>
+			<label index="common">Common settings</label>
+			<label index="crossdomain">Cross-domain tracking</label>
+			<label index="external">E-Mail &amp; external link tracking</label>
+			<label index="download">Download tracking</label>
+			<label index="direct">Direct traffic</label>
+			<label index="searchengines">Search engines</label>
+			<label index="pages.tx_twgoogleanalytics_no_tracking">Google Analytics tracking</label>
+		</languageKey>
+		<languageKey index="fr" type="array">
+			<label index="features">Caractéristiques</label>
+			<label index="common">Paramètres communs</label>
+			<label index="crossdomain">Suivi multi-domaines</label>
+			<label index="external">Suivi des liens externes et courriels</label>
+			<label index="download">Suivi des liens sur fichiers</label>
+			<label index="direct">Trafic direct</label>
+			<label index="searchengines">Moteurs de recherche</label>
+			<label index="pages.tx_twgoogleanalytics_no_tracking">Statistiques Google Analytics</label>
+		</languageKey>
+		<languageKey index="de" type="array">
+			<label index="features">Funktionen</label>
+			<label index="common">Allgemeine Einstellungen</label>
+			<label index="crossdomain">Cross-Domain-Tracking</label>
+			<label index="external">Tracking von E-Mail- &amp; externen Verknüpfungen</label>
+			<label index="download">Tracking von Download-Verknüpfungen</label>
+			<label index="direct">Direkter Traffic</label>
+			<label index="searchengines">Suchmaschinen</label>
+			<label index="pages.tx_twgoogleanalytics_no_tracking">Google Analytics-Tracking</label>
+		</languageKey>
+	</data>
+</T3locallang>

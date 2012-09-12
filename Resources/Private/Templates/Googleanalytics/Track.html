@@ -1,0 +1,22 @@
+{namespace tw=Tx_TwGoogleanalytics_ViewHelpers}
+<f:if condition="{settings.wpid}"><script type="text/javascript"><![CDATA[
+if (typeof(tw_gat) == 'object') {
+	tw_gat	.debug(]]>{settings.debug}<![CDATA[)
+		.setAccount(']]>{settings.wpid}<![CDATA[')
+		.setDomainName(']]>{settings.crossdomain.main}<![CDATA[')
+		.setCrossDomains([]]><f:for each="{settings.crossdomain.cross}" as="domain" iteration="iter"><f:if condition="{iter.index}">,</f:if>'{domain}'</f:for><![CDATA[])
+		.anonymizeIP(]]>{settings.features.anonymizeIP}<![CDATA[)
+		.trackClientInfo(]]>{settings.features.track.client}<![CDATA[)
+		.trackFlashVersion(]]>{settings.features.track.flash}<![CDATA[)
+		.trackPageTitle(]]>{settings.features.track.title}<![CDATA[)
+		.trackExternals(]]>{settings.external.track},'{settings.external.prefix}',<tw:raw>{settings.external.restrict}</tw:raw><![CDATA[)
+		.trackEmails(]]>{settings.email.track},'{settings.email.prefix}',<tw:raw>{settings.email.restrict}</tw:raw><![CDATA[)
+		.trackDownloads(]]>{settings.download.track},'{settings.download.prefix}','{settings.download.template}',<tw:raw>{settings.download.list}</tw:raw><![CDATA[)
+		.addDirectKeywords(]]><tw:raw>{settings.direct.keywords}</tw:raw><![CDATA[)
+		.addDirectReferrers(]]><tw:raw>{settings.direct.referrers}</tw:raw><![CDATA[)
+		.addSearchEngines(]]><tw:raw>{settings.searchengines}</tw:raw><![CDATA[)
+		.registerCustomVariables(]]><tw:raw>{customVariables}</tw:raw><![CDATA[)
+		.trackPageview("]]>{pageUrl}<![CDATA[");
+	(function(){ var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true; ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js'; var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);})();
+}
+]]></script></f:if>

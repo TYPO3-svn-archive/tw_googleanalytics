@@ -319,7 +319,7 @@ class Tx_TwGoogleanalytics_Controller_GoogleanalyticsController extends Tx_Extba
 		$domains				= array();
 		$str					= trim($str);
 		if (strlen($str)) {
-			$str				= array_map('trim', preg_split("%[^a-z\d\.]+%", strtolower($str)));
+			$str				= array_map('trim', preg_split("%[^a-z\-\d\.]+%", strtolower($str)));
 			foreach ($str as $domain) {
 				if (strlen($domain)) {
 					$domains[]	= $domain;

@@ -106,7 +106,13 @@ var tw_gat = {
      * 
      * @type {Object}
      */
-    '_trackDownload': null
+    '_trackDownload': null,
+    /**
+     * Tracking handler ready state
+     * 
+     * @type {Number}
+     */
+    '_trackReady': 0
 };
 
 /**
@@ -449,7 +455,7 @@ tw_gat.setCrossDomains = function(crossDomains) {
                 _gaq.push(['_setAllowLinker', this._linker]);
             }
             
-            this.installTrackingHandlers();
+            this.installTrackingHandlers(1);
         }
     }
     return this;
@@ -458,31 +464,35 @@ tw_gat.setCrossDomains = function(crossDomains) {
 /**
  * Activate the click & submit handlers for crossdomain and / or download tracking
  * 
+ * @param {Number} readyState			Tracking handler ready state
  * @return {Object}                     Self reference (liquid interface)
  */
-tw_gat.installTrackingHandlers = function() {
+tw_gat.installTrackingHandlers = function(readyState) {
     if (this._accountId && !this._clickHandler) {
+    	this._trackReady				|= readyState;
+    	if (this._trackReady == 3) {
         
-        // Klick-Handler for links / submit handler for forms
-        this._clickHandler          = function(e) { tw_gat.click(e); };
-        var installFormHandlers     = function() {
-            var submitHandler       = function(e) { return tw_gat.submit(e, this); };
-            for (var f = 0, fl = document.forms.length; f < fl; ++f) {
-                if (window.addEventListener){
-                    document.forms[f].addEventListener('submit', submitHandler, false);
-                } else {
-                    document.attachEvent('onsubmit', submitHandler);
-                }
-            }
-        }
-        
-        if (window.addEventListener){
-            document.addEventListener('click', this._clickHandler, false);
-            window.addEventListener('load', installFormHandlers, false)
-        } else {
-            document.attachEvent('onclick', this._clickHandler);
-            document.attachEvent('onload', installFormHandlers);
-        }
+	        // Klick-Handler for links / submit handler for forms
+	        this._clickHandler          = function(e) { tw_gat.click(e); };
+	        var installFormHandlers     = function() {
+	            var submitHandler       = function(e) { return tw_gat.submit(e, this); };
+	            for (var f = 0, fl = document.forms.length; f < fl; ++f) {
+	                if (window.addEventListener){
+	                    document.forms[f].addEventListener('submit', submitHandler, false);
+	                } else {
+	                    document.attachEvent('onsubmit', submitHandler);
+	                }
+	            }
+	        }
+	        
+	        if (window.addEventListener){
+	            document.addEventListener('click', this._clickHandler, false);
+	            window.addEventListener('load', installFormHandlers, false)
+	        } else {
+	            document.attachEvent('onclick', this._clickHandler);
+	            document.attachEvent('onload', installFormHandlers);
+	        }
+    	}
     }
 }
 
@@ -554,11 +564,11 @@ tw_gat.submit = function(e, form) {
  * @return {Boolean}                    Always FALSE
  */
 tw_gat.cancel = function(e) {
-    e.returnValue       = false;
     e.cancelBubble      = true;
     if (e.stopPropagation) {
         e.stopPropagation();
     }
+    e.returnValue       = false;
     if (e.preventDefault) {
         e.preventDefault();
     }
@@ -616,7 +626,7 @@ tw_gat.trackExternals = function(mode, prefix, restrict) {
             for (var d = 0, domains = restrict || [], dl = domains.length; d < dl; ++d) {
                 this._trackExternal.restrict.push(domains[d].toLowerCase());
             }
-            this.installTrackingHandlers();
+            this.installTrackingHandlers(1);
         } else {
             this._trackExternal = null; 
         }
@@ -639,7 +649,7 @@ tw_gat.trackEmails = function(mode, prefix, restrict) {
             for (var e = 0, emails = restrict || [], el = emails.length; e < el; ++e) {
                 this._trackEmail.restrict.push(emails[e].toLowerCase());
             }
-            this.installTrackingHandlers();
+            this.installTrackingHandlers(1);
         } else {
             this._trackEmail    = null; 
         }
@@ -692,7 +702,7 @@ tw_gat.trackDownloads = function(mode, prefix, template, list) {
             }
         }
         if (this._trackDownload && this._trackDownload.list) {
-            this.installTrackingHandlers();
+            this.installTrackingHandlers(1);
         }
     }
     return this;

@@ -1,5 +1,7 @@
 <?php
 
+namespace Tollwerk\TwGoogleanalytics\Controller;
+
 /***************************************************************
  *  Copyright notice
  *
@@ -33,7 +35,7 @@
  * @copyright	Copyright © 2013 tollwerk® GmbH (http://tollwerk.de)
  * @author		Dipl.-Ing. Joschi Kuphal <joschi@tollwerk.de>
  */
-class Tx_TwGoogleanalytics_Controller_GoogleanalyticsController extends Tx_Extbase_MVC_Controller_ActionController {
+class GoogleanalyticsController extends \TYPO3\CMS\Extbase\Mvc\Controller\ActionController {
 	/**
 	 * Minimum custom variable index
 	 * 
@@ -177,8 +179,8 @@ class Tx_TwGoogleanalytics_Controller_GoogleanalyticsController extends Tx_Extba
 		$this->settings['download']['track']				= (strlen($this->settings['download']['prefix']) && count($this->settings['download']['list'])) ? $this->settings['download']['track'] : 0;
 		$this->settings['download']['list']					= json_encode($this->settings['download']['list']);
 		
-		$this->settings['direct']['keywords']				= json_encode(t3lib_div::trimExplode(',', implode(',', preg_split("%[\,\;]+%", $this->settings['direct']['keywords'])), true));
-		$this->settings['direct']['referrers']				= json_encode(t3lib_div::trimExplode(',', implode(',', preg_split("%[\,\;]+%", $this->settings['direct']['referrers'])), true));
+		$this->settings['direct']['keywords']				= json_encode(\TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', implode(',', preg_split("%[\,\;]+%", $this->settings['direct']['keywords'])), true));
+		$this->settings['direct']['referrers']				= json_encode(\TYPO3\CMS\Core\Utility\GeneralUtility::trimExplode(',', implode(',', preg_split("%[\,\;]+%", $this->settings['direct']['referrers'])), true));
 		
 		$searchEngines										= preg_split("%[\,\;]+%", $this->settings['searchengines']);
 		$this->settings['searchengines']					= array();
@@ -208,8 +210,9 @@ class Tx_TwGoogleanalytics_Controller_GoogleanalyticsController extends Tx_Extba
 		
 		// If a configuration array has been passed ...
 		if (is_array($pageUrlConfig)) {
-			$pageUrlConfig				= Tx_Extbase_Utility_TypoScript::convertPlainArrayToTypoScriptArray($this->settings);
-			/* @var $cObj tslib_cObj */			
+			$typoScriptService			= new \TYPO3\CMS\Extbase\Service\TypoScriptService();
+			$pageUrlConfig				= $typoScriptService->convertTypoScriptArrayToPlainArray($this->settings);
+			/* @var $cObj \TYPO3\CMS\Frontend\ContentObject\ContentObjectRenderer */			
 			$cObj						= $GLOBALS['TSFE']->cObj;
 			$pageUrl					= $cObj->cObjGetSingle($pageUrlConfig['pageUrl'], $pageUrlConfig['pageUrl.']);
 			return $pageUrl;
@@ -269,7 +272,7 @@ class Tx_TwGoogleanalytics_Controller_GoogleanalyticsController extends Tx_Extba
 						foreach ($gpVariables as $index => $steps) {
 							$stack							= null;
 							foreach ($steps as $step) {
-								$stack						= ($stack == null) ? t3lib_div::_GP($step) : (array_key_exists($step, $stack) ? $stack[$step] : null);
+								$stack						= ($stack == null) ? \TYPO3\CMS\Core\Utility\GeneralUtility::_GP($step) : (array_key_exists($step, $stack) ? $stack[$step] : null);
 								if (!is_array($stack) && !strlen($stack)) {
 									continue 2;
 								}

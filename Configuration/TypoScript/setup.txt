@@ -1,4 +1,4 @@
-plugin.tx_twgoogleanalytics				= USER_INT
+plugin.tx_twgoogleanalytics				= USER
 plugin.tx_twgoogleanalytics {
 	view {
 		templateRootPath				= {$plugin.tx_twgoogleanalytics.view.templateRootPath}
@@ -65,6 +65,7 @@ plugin.tx_twgoogleanalytics {
 
 	plugin.tx_twgoogleanalytics {
 		userFunc						= tx_extbase_core_bootstrap->run
+		vendorName						= Tollwerk
 		extensionName					= TwGoogleanalytics
 		pluginName						= Googleanalytics
 		controller						= Googleanalytics
@@ -75,4 +76,5 @@ plugin.tx_twgoogleanalytics {
 			}
 		}
 	}
+
 [global]

@@ -30,9 +30,9 @@ if (!defined('TYPO3_MODE')) {
 	die ('Access denied.');
 }
 
-t3lib_extMgm::addStaticFile($_EXTKEY, 'Configuration/TypoScript', 'tollwerk Google Analytics');
+\TYPO3\CMS\Core\Utility\ExtensionManagementUtility::addStaticFile($_EXTKEY, 'Configuration/TypoScript', 'tollwerk Google Analytics');
 
-t3lib_div::loadTCA('pages');
+\TYPO3\CMS\Core\Utility\GeneralUtility::loadTCA('pages');
 $TCA['pages']['columns']['tx_twgoogleanalytics_no_tracking'] = array(
 	'label'			=> 'LLL:EXT:tw_googleanalytics/Resources/Private/Language/locallang_db.xlf:pages.tx_twgoogleanalytics_no_tracking',
 	'config'		=> Array (

@@ -75,5 +75,4 @@ plugin.tx_twgoogleanalytics {
 			}
 		}
 	}
-}
 [global]

@@ -3,7 +3,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Dipl.-Ing. Joschi Kuphal (joschi@tollwerk.de)
+ *  Copyright © 2013 Dipl.-Ing. Joschi Kuphal (joschi@tollwerk.de)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -30,7 +30,7 @@
  * Google Analytics Tracker Controller
  *
  * @package		tw_googleanalytics
- * @copyright	Copyright © 2011 tollwerk® GmbH (http://tollwerk.de)
+ * @copyright	Copyright © 2013 tollwerk® GmbH (http://tollwerk.de)
  * @author		Dipl.-Ing. Joschi Kuphal <joschi@tollwerk.de>
  */
 class Tx_TwGoogleanalytics_Controller_GoogleanalyticsController extends Tx_Extbase_MVC_Controller_ActionController {

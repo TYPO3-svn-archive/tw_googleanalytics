@@ -3,7 +3,7 @@
 ########################################################################
 # Extension Manager/Repository config file for ext "tw_googleanalytics".
 #
-# Auto generated 02-10-2012 14:45
+# Auto generated 09-02-2013 15:51
 #
 # Manual updates:
 # Only the data in the array - everything else is removed by next
@@ -27,7 +27,7 @@ $EM_CONF[$_EXTKEY] = array(
 	'modify_tables' => '',
 	'clearCacheOnLoad' => 0,
 	'lockType' => '',
-	'version' => '1.0.0',
+	'version' => '1.0.2',
 	'constraints' => array(
 		'depends' => array(
 			'extbase' => '1.3.0-0.0.0',
@@ -40,7 +40,7 @@ $EM_CONF[$_EXTKEY] = array(
 		'suggests' => array(
 		),
 	),
-	'_md5_values_when_last_written' => 'a:14:{s:12:"ext_icon.gif";s:4:"fb0a";s:17:"ext_localconf.php";s:4:"9258";s:14:"ext_tables.php";s:4:"0ddf";s:14:"ext_tables.sql";s:4:"194c";s:48:"Classes/Controller/GoogleanalyticsController.php";s:4:"d523";s:37:"Classes/ViewHelpers/RawViewHelper.php";s:4:"d064";s:38:"Configuration/TypoScript/constants.txt";s:4:"650e";s:34:"Configuration/TypoScript/setup.txt";s:4:"7fdb";s:40:"Resources/Private/Language/locallang.xml";s:4:"bb19";s:43:"Resources/Private/Language/locallang_db.xml";s:4:"d7d8";s:54:"Resources/Private/Templates/Googleanalytics/Track.html";s:4:"c14c";s:41:"Resources/Public/Js/tw_googleanalytics.js";s:4:"98e7";s:14:"doc/manual.pdf";s:4:"bee3";s:14:"doc/manual.sxw";s:4:"1241";}',
+	'_md5_values_when_last_written' => 'a:16:{s:12:"ext_icon.gif";s:4:"fb0a";s:17:"ext_localconf.php";s:4:"367c";s:14:"ext_tables.php";s:4:"3b80";s:14:"ext_tables.sql";s:4:"194c";s:48:"Classes/Controller/GoogleanalyticsController.php";s:4:"9193";s:37:"Classes/ViewHelpers/RawViewHelper.php";s:4:"78aa";s:38:"Configuration/TypoScript/constants.txt";s:4:"f91c";s:34:"Configuration/TypoScript/setup.txt";s:4:"015d";s:46:"Resources/Private/Language/de.locallang_db.xlf";s:4:"4c75";s:46:"Resources/Private/Language/fr.locallang_db.xlf";s:4:"2d5f";s:40:"Resources/Private/Language/locallang.xlf";s:4:"18b7";s:43:"Resources/Private/Language/locallang_db.xlf";s:4:"ace3";s:54:"Resources/Private/Templates/Googleanalytics/Track.html";s:4:"c14c";s:41:"Resources/Public/Js/tw_googleanalytics.js";s:4:"8e23";s:14:"doc/manual.pdf";s:4:"dac6";s:14:"doc/manual.sxw";s:4:"ec1c";}',
 );
 
 ?>

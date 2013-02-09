@@ -3,7 +3,7 @@
 /***************************************************************
  *  Copyright notice
  *
- *  (c) 2012 Dipl.-Ing. Joschi Kuphal (joschi@tollwerk.de)
+ *  Copyright © 2013 Dipl.-Ing. Joschi Kuphal (joschi@tollwerk.de)
  *  All rights reserved
  *
  *  This script is part of the TYPO3 project. The TYPO3 project is
@@ -34,7 +34,7 @@ t3lib_extMgm::addStaticFile($_EXTKEY, 'Configuration/TypoScript', 'tollwerk Goog
 
 t3lib_div::loadTCA('pages');
 $TCA['pages']['columns']['tx_twgoogleanalytics_no_tracking'] = array(
-	'label'			=> 'LLL:EXT:tw_googleanalytics/Resources/Private/Language/locallang_db.xml:pages.tx_twgoogleanalytics_no_tracking',
+	'label'			=> 'LLL:EXT:tw_googleanalytics/Resources/Private/Language/locallang_db.xlf:pages.tx_twgoogleanalytics_no_tracking',
 	'config'		=> Array (
 		'type'		=> 'check',
 		'items'		=> array(

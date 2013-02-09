@@ -1,4 +1,12 @@
 /**
+ * Google Analytics Tracker
+ *
+ * @package		tw_googleanalytics
+ * @copyright	Copyright © 2013 tollwerk® GmbH (http://tollwerk.de)
+ * @author		Dipl.-Ing. Joschi Kuphal <joschi@tollwerk.de>
+ */
+
+/**
  * Google Analytics Queue
  * 
  * @type {Array} 

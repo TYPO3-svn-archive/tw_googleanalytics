@@ -120,7 +120,7 @@ class GoogleanalyticsController extends \TYPO3\CMS\Extbase\Mvc\Controller\Action
 		}
 		$this->settings['crossdomain']['cross']				= $this->_getDomains($this->settings['crossdomain']['cross']);
 		
-		// Collecting custom variables
+		// Collecting custom variables (Google Analytics only)
 		$customVariables				= array();
 		foreach((array_key_exists('customVariables', $this->settings) ? (array)$this->settings['customVariables'] : array()) as $index => $variableKeyValue) {
 			$index						= intval($index);
@@ -142,6 +142,23 @@ class GoogleanalyticsController extends \TYPO3\CMS\Extbase\Mvc\Controller\Action
 					$customVariables[]						= array_values($customVariable);
 				}
 			} 
+		}
+		
+		// Collecting custom dimension & metrics (Universal Analytics only)
+		$customDimensions									=
+		$customMetrics										= array();
+		foreach((array_key_exists('customDimensions', $this->settings) ? (array)$this->settings['customDimensions'] : array()) as $dimension => $value) {
+			if (preg_match("%^dimension\d+$%", $dimension)) {
+				$customDimensions[$dimension]				= is_array($value) ? $this->_getValue($value) : strval($value);
+			}
+		}
+		foreach((array_key_exists('customMetrics', $this->settings) ? (array)$this->settings['customMetrics'] : array()) as $metric => $value) {
+			if (preg_match("%^metric\d+$%", $metric)) {
+				$value										= is_array($value) ? $this->_getValue($value) : strval($value);
+				if (preg_match("%^\d+(\.\d+)?$%", $value)) {
+					$customMetrics[$metric]					= floatval($value);
+				}
+			}
 		}
 		
 		$this->settings['external']['track']				= min(2, max(0, intval($this->settings['external']['track'])));
@@ -192,6 +209,7 @@ class GoogleanalyticsController extends \TYPO3\CMS\Extbase\Mvc\Controller\Action
 		$this->settings['searchengines']					= json_encode($this->settings['searchengines']);
 		
 		$this->view->assign('customVariables', json_encode($customVariables));
+		$this->view->assign('customDimensionsMetrics', json_encode(array_merge($customDimensions, $customMetrics)));
 		$this->view->assign('pageUrl', $this->_getPageUrl(array_key_exists('pageUrl', $this->settings) ? $this->settings['pageUrl'] : null));
 		$this->view->assign('settings', $this->settings);
 	}

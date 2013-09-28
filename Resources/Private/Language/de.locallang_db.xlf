@@ -52,8 +52,8 @@
 				<target>Pfad zum Layout-Verzeichnis (FE):Mit dieser Einstellung können Sie das Layout-Verzeichnis anpassen, wenngleich auch der Standard-Plugin keine Layouts nutzt ...</target>
 			</trans-unit>
 			<trans-unit id="common.enable" xml:space="preserve" approved="yes">
-				<source>Enable Google Analytics Tracking:This has to be enabled for tracking your website with Google Analytics</source>
-				<target>Google Analytics-Tracking aktivieren:Aktivieren Sie diese Option, um Ihre Website per Google Analytics zu erfassen</target>
+				<source>Enable Google Analytics Tracking:This has to be enabled for tracking your website with Google / Universal Analytics</source>
+				<target>Google Analytics-Tracking aktivieren:Aktivieren Sie diese Option, um Ihre Website per Google / Universal Analytics zu erfassen</target>
 			</trans-unit>
 			<trans-unit id="common.wpid" xml:space="preserve" approved="yes">
 				<source>Google Analytics &quot;Web Property-ID&quot;:The &quot;Web Property-ID&quot; is issued by Google Analytics and uniquely identifies your website. It should have the format UA-XXXXX-X and can be found in the &quot;Admin &gt; Account Administration&quot; section of your Google Analytics interface</source>

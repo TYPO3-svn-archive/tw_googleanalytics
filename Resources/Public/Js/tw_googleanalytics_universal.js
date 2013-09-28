@@ -1,7 +1,7 @@
 /**
- * Google Analytics Tracker
+ * Universal Analytics Tracker
  * 
- * Compatible with ga.js
+ * Compatible with universial.js
  *
  * @package		tw_googleanalytics
  * @copyright	Copyright © 2013 tollwerk® GmbH (http://tollwerk.de)
@@ -9,14 +9,17 @@
  */
 
 /**
- * Google Analytics Queue
- * 
- * @type {Array} 
+ * Install the Universal tracking prerequisites (part of original Universal tracking code)
  */
-var _gaq = _gaq || [];
+(function(i, r) {
+	i['GoogleAnalyticsObject'] = r;
+	i[r] = i[r] || function() {
+		(i[r].q = i[r].q || []).push(arguments)
+	}, i[r].l = 1 * new Date();
+})(window, 'ga');
 
 /**
- * Google Analytics Tracker
+ * Universal Analytics Tracker
  * 
  * @type {Object} 
  */
@@ -33,12 +36,6 @@ var tw_gat = {
      * @type {Array} 
      */
     '_activeCustomVariables': [false, false, false, false, false],
-    /**
-     * Bitmask for custom variables set for subsequent tracking requests
-     * 
-     * @type {Number}
-     */
-    '_futureCustomVariables': 0,
     /**
      * Google Analytics account ID
      * 
@@ -122,7 +119,19 @@ var tw_gat = {
      * 
      * @type {Number}
      */
-    '_trackReady': 0
+    '_trackReady': 0,
+    /**
+     * IP address anonymization
+     * 
+     * @type {Boolean}
+     */
+    '_anonymizeIP': false,
+    /**
+     * Tracker has been created
+     * 
+     * @type {Boolean}
+     */
+    '_created': false
 };
 
 /**
@@ -165,109 +174,51 @@ tw_gat.debug = function(debugMode) {
 }
 
 /**
- * Registration of custom variables
+ * Registration of custom dimensions & metrics
  * 
- * Custom variables have to be registered prior to submitting them to Google Analytics. The latter
- * will be accomplished by tw_gat.setCustomVariables() on any subsequent pageView or event tracking
- * request, you don't have to take care about that.
+ * Custom dimensions and metrics have to be registered at your Universal Analytics prior to submitting them.
+ * You have to pass an object of custom dimensions and metrics to this method. The property names are used
+ * as dimension / metric indices:
  * 
- * You have to pass an array of custom variable definitions to this method, each being an array itself and
- * consisting of up to 4 elements (corresponding to the 4 arguments taken by the GA-method _setCustomVar):
+ * {
+ * 		'dimension1': 'value 1',
+ * 		'dimension2': 'value 2',
+ * 		'metric1': 800,
+ * 		'metric2': 29.50,
+ * }
  * 
- * index, key [, value [, level]] 
+ * Once set, the custom dimensions will be submitted to Universal Analytics along with every pageview and
+ * event submission.
  * 
- * The third an forth element are optional. If the third element is present but empty, NULL or FALSE,
- * the custom variable will be unset. For a full documentation of the possible argument values
- * @link https://developers.google.com/analytics/devguides/collection/gajs/methods/gaJSApiBasicConfiguration#_gat.GA_Tracker_._setCustomVar
+ * For a full documentation:
+ * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/custom-dims-mets
  * 
- * @param {Array} customVariables       Custom variables
- * @return {Object}                     Self reference (liquid interface)
+ * @param {Array} customDimensionsMetrics      Custom dimensions and metrics
+ * @return {Object}                     		Self reference (liquid interface)
  */
-tw_gat.registerCustomVariables = function(customVariables) {
-    if (this._accountId && this.isArray(customVariables)) {
-        for (var i = 0; i < customVariables.length; ++i) {
-            if (this.isArray(customVariables[i]) && (customVariables[i].length >= 2) && (customVariables[i].length <= 4)) {
-                var index               = parseInt(customVariables[i][0]);
-                if (!isNaN(index) && (index >= 1) && (index <= 5)) {
-                    var key             = this.trim(customVariables[i][1]);
-                    var value           = null;
-                    var level           = 3;
-                    if (customVariables[i].length > 2) {
-                        if ((customVariables[i][2] !== null) && (customVariables[i][2] !== false)) {
-                            value       = this.trim(customVariables[i][2]);
-                            if (value.length) {
-                                value   = value.substr(0, Math.min(value.length, 63 - key.length));
-                            } else {
-                                value   = null;
-                            }
-                        }
-                        level           = 3;
-                        if (customVariables[i].length > 3) {
-                            var plevel  = parseInt(customVariables[i][3]);
-                            level       = isNaN(plevel) ? 3 : plevel;
-                        }
-                    }
-                    
-                    if (value === null) {
-                        this._customVariables[index - 1]    = null;
-                        this._futureCustomVariables         &= ~Math.pow(2, index - 1);
-                    } else {
-                        this._customVariables[index - 1]    = [index, key, value, level];
-                        this._futureCustomVariables         |= Math.pow(2, index - 1);
-                    }
-                }
-            }
-        }
+tw_gat.registerCustomDimensionsMetrics = function(customDimensionsMetrics) {
+    if (this._createTracker() && (typeof(customDimensionsMetrics) == 'object')) {
+    	for (var dm in customDimensionsMetrics) {
+    		if (this._debug && console) {
+		        console.log('Universal Analytics', 'set', customDimensionsMetrics);
+		    }
+		    if (this._debug < 2) {
+		        ga('set', customDimensionsMetrics);
+		    }
+		    break;
+    	}
     }
     return this;
 }
 
 /**
- * Transmission of (previously registered) custom variables
- * 
- * @return {Object}                     Self reference (liquid interface)
- */
-tw_gat.setCustomVariables = function() {
-    if (this._accountId) {
-        for (var i = 0; i < this._customVariables.length; ++i) {
-            if (this._customVariables[i] === null) {
-                if (this._activeCustomVariables[i]) {
-                    if (this._debug && console) {
-                        console.log('Google Analytics', '_deleteCustomVar', i + 1);
-                    }
-                    if (this._debug < 2) {
-                        this._activeCustomVariables[i] = false;
-                        _gaq.push(['_deleteCustomVar', i + 1]);
-                    }
-                }
-            } else {
-                if (this._debug && console) {
-                    console.log('Google Analytics', '_setCustomVar', this._customVariables[i][0], this._customVariables[i][1], this._customVariables[i][2], this._customVariables[i][3]);
-                }
-                if (this._debug < 2) {
-                    this._activeCustomVariables[i] = true;
-                    _gaq.push(['_setCustomVar', this._customVariables[i][0], this._customVariables[i][1], this._customVariables[i][2], this._customVariables[i][3]]);
-                }
-            }
-        }
-    }
-    return this;
-}
-
-/**
- * Setting the Google Analytics account ID
+ * Setting the Google Analytics account / web property ID
  * 
  * @param {String} accountId            Google Analytics account ID
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.setAccount = function(accountId) {
     this._accountId         = this.trim(accountId);
-    if (this._debug && console) {
-        console.log('Google Analytics', '_setAccount', this._accountId);
-    }
-    if (this._accountId && (this._debug < 2)) {
-        _gaq.push(['_setAccount', this._accountId]);
-    }
     return this;
 }
 
@@ -278,93 +229,47 @@ tw_gat.setAccount = function(accountId) {
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.setDomainName = function(domainName) {
-    if (this._accountId) {
-        domainName              = this.trim(domainName);
-        if (domainName.length && (domainName != this._domainName)) {
-            this._domainName    = domainName;
-            if (this._debug && console) {
-                console.log('Google Analytics', '_setDomainName', this._domainName);
-            }
-            if (this._debug < 2) {
-                _gaq.push(['_setDomainName', this._domainName]);
-            }
-        }
+    domainName              = this.trim(domainName);
+    if (domainName.length && (domainName != this._domainName)) {
+        this._domainName    = domainName;
     }
     return this;
 }
 
 /**
- * Adding a list of keywords treated as direct traffic
+ * One time creation of the tracker object
  * 
- * @param {Array} keywords              Keywords
- * @return {Object}                     Self reference (liquid interface)
+ * @return {Boolean}					Success
  */
-tw_gat.addDirectKeywords = function(keywords) {
-    if (this._accountId && this.isArray(keywords) && keywords.length) {
-        for (var k = 0, kl = keywords.length, kw; k < kl; ++k) {
-            kw                  = this.trim(keywords[k]);
-            if (kw.length) {
-                if (this._debug && console) {
-                    console.log('Google Analytics', '_addIgnoredOrganic', kw);
-                }
-                if (this._debug < 2) {
-                    _gaq.push(['_addIgnoredOrganic', kw]);
-                }
-            }
-        }
-    }
-    return this;
-}
-
-/**
- * Adding a list of referrers treated as direct traffic
- * 
- * @param {Array} referrers             Referrers
- * @return {Object}                     Self reference (liquid interface)
- */
-tw_gat.addDirectReferrers = function(referrers) {
-    if (this._accountId && this.isArray(referrers) && referrers.length) {
-        for (var r = 0, rl = referrers.length, rf; r < rl; ++r) {
-            rf                  = this.trim(referrers[r]);
-            if (rf.length) {
-                if (this._debug && console) {
-                    console.log('Google Analytics', '_addIgnoredRef', rf);
-                }
-                if (this._debug < 2) {
-                    _gaq.push(['_addIgnoredRef', rf]);
-                }
-            }
-        }
-    }
-    return this;
-}
-
-/**
- * Adding a list of search engine definitions
- * 
- * @param {Array} searchengines         Search engine definitions
- * @return {Object}                     Self reference (liquid interface)
- */
-tw_gat.addSearchEngines = function(searchengines) {
-    if (this._accountId && this.isArray(searchengines) && searchengines.length) {
-        for (var s = 0, sl = searchengines.length, se; s < sl; ++s) {
-            se                          = searchengines[s];
-            if (this.isArray(se, 2) || this.isArray(se, 3)) {
-                var seName              = this.trim(se[0]);
-                var seKeyword           = this.trim(se[1]);
-                if (seName.length && seKeyword.length) {
-                    var sePrepend       = (se.length > 2) ? !!se[2] : false;
-                    if (this._debug && console) {
-                        console.log('Google Analytics', '_addOrganic', seName, seKeyword, sePrepend);
-                    }
-                    if (this._debug < 2) {
-                        _gaq.push(['_addOrganic', seName, seKeyword, sePrepend]);
-                    }
-                }
-            }
-        }
-    }
-    return this;
+tw_gat._createTracker = function() {
+	if (!this._created && this._accountId) {
+		if (this._linker) {
+			if (this._debug && console) {
+		        console.log('Universal Analytics', 'create', this._accountId, {'allowLinker': true});
+		        console.log('Universal Analytics', 'require', 'linker');
+		        console.log('Universal Analytics', 'linker:autoLink', this._crossDomains);
+		    }
+		    if (this._debug < 2) {
+		        ga('create', this._accountId, {'allowLinker': true});
+		        ga('require', 'linker');
+		        ga('linker:autoLink', this._crossDomain);
+		    }
+		    
+		} else {
+			if (this._debug && console) {
+		        console.log('Universal Analytics', 'create', this._accountId);
+		    }
+		    if (this._debug < 2) {
+		        ga('create', this._accountId);
+		    }
+		}
+		if (this._anonymizeIP) {
+			console.log('Universal Analytics', 'set', 'anonymizeIp', true);
+			ga('set', 'anonymizeIp', true);
+		}
+	    this._created = true;
+	}
+	return this._created;
 }
 
 /**
@@ -375,12 +280,7 @@ tw_gat.addSearchEngines = function(searchengines) {
  */
 tw_gat.anonymizeIP = function(anonymizeIP) {
     if (!!anonymizeIP && this._accountId) {
-        if (this._debug && console) {
-            console.log('Google Analytics', '_gat._anonymizeIp');
-        }
-        if (this._debug < 2) {
-            _gaq.push(['_gat._anonymizeIp']);
-        }
+        this._anonymizeIP = true;
     }
     return this;
 }
@@ -392,15 +292,7 @@ tw_gat.anonymizeIP = function(anonymizeIP) {
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.trackClientInfo = function(clientInfo) {
-    if (this._accountId && (!!clientInfo != this._clientInfo)) {
-        this._clientInfo        = !!clientInfo;
-        if (this._debug && console) {
-            console.log('Google Analytics', '_gat._setClientInfo', this._clientInfo);
-        }
-        if (this._debug < 2) {
-            _gaq.push(['_gat._setClientInfo', this._clientInfo]);
-        }
-    }
+    // Currently not available for Universal Analytics
     return this;
 }
 
@@ -411,15 +303,7 @@ tw_gat.trackClientInfo = function(clientInfo) {
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.trackFlashVersion = function(flashVersion) {
-    if (this._accountId && (!!flashVersion != this._flashVersion)) {
-        this._flashVersion      = !!flashVersion;
-        if (this._debug && console) {
-            console.log('Google Analytics', '_gat._setDetectFlash', this._flashVersion);
-        }
-        if (this._debug < 2) {
-            _gaq.push(['_gat._setDetectFlash', this._flashVersion]);
-        }
-    }
+    // Currently not available for Universal Analytics
     return this;
 }
 
@@ -430,15 +314,7 @@ tw_gat.trackFlashVersion = function(flashVersion) {
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.trackPageTitle = function(pageTitle) {
-    if (this._accountId && (!!pageTitle != this._pageTitle)) {
-        this._pageTitle         = !!pageTitle;
-        if (this._debug && console) {
-            console.log('Google Analytics', '_gat._setDetectTitle', this._pageTitle);
-        }
-        if (this._debug < 2) {
-            _gaq.push(['_gat._setDetectTitle', this._pageTitle]);
-        }
-    }
+    // Currently not available for Universal Analytics
     return this;
 }
 
@@ -458,13 +334,6 @@ tw_gat.setCrossDomains = function(crossDomains) {
         }
         if (this._crossDomains.length && !this._linker) {
             this._linker        = true;
-            if (this._debug && console) {
-                console.log('Google Analytics', '_setAllowLinker', this._linker);
-            }
-            if (this._debug < 2) {
-                _gaq.push(['_setAllowLinker', this._linker]);
-            }
-            
             this.installTrackingHandlers(1);
         }
     }
@@ -592,14 +461,7 @@ tw_gat.cancel = function(e) {
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.link = function(url) {
-    if (this._accountId && url.length) {
-        if (this._debug && console) {
-            console.log('Google Analytics', '_link', url);
-        }
-        if (this._debug < 2) {
-            _gaq.push(['_link', url]);
-        }
-    }
+    // Currently not available for Universal Analytics
     return this;
 }
 
@@ -610,14 +472,7 @@ tw_gat.link = function(url) {
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.linkByPost = function(form) {
-    if (this._accountId && form) {
-        if (this._debug && console) {
-            console.log('Google Analytics', '_linkByPost', form);
-        }
-        if (this._debug < 2) {
-            _gaq.push(['_linkByPost', form]);
-        }
-    }
+   // Currently not available for Universal Analytics
     return this;
 }
 
@@ -725,17 +580,13 @@ tw_gat.trackDownloads = function(mode, prefix, template, list) {
  * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.trackPageview = function(pageUrl) {
-    if (this._accountId) {
+    if (this._createTracker()) {
         pageUrl                 = (arguments.length ? this.trim(pageUrl) : this._lastPageUrl) || '';
         if (this._debug && console) {
-            console[(this._futureCustomVariables && console.group) ? 'group' : 'log']('Google Analytics', '_trackPageview', pageUrl);
+            pageUrl.length ? console.log('Universal Analytics', 'send', 'pageview', pageUrl) : console.log('Universal Analytics', 'send', 'pageview');
         }
-        this.setCustomVariables();
         if (this._debug < 2) {
-            _gaq.push(pageUrl.length ? ['_trackPageview', pageUrl] : ['_trackPageview']);
-        }
-        if (this._debug && console && console.group && this._futureCustomVariables) {
-            console.groupEnd();
+        	pageUrl.length ? ga('send', 'pageview', pageUrl) : ga('send', 'pageview');
         }
         this._lastPageUrl       = pageUrl;
     }
@@ -746,52 +597,32 @@ tw_gat.trackPageview = function(pageUrl) {
  * Tracking an event
  * 
  * For a detailed explanation of the available arguments please
- * @see https://developers.google.com/analytics/devguides/collection/gajs/eventTrackerGuide
+ * @see https://developers.google.com/analytics/devguides/collection/analyticsjs/events
  * 
  * @param {String} category             Event category
  * @param {String} action               Event action
  * @param {String} label                Optional: Event label
  * @param {Number} value                Optional: Event value
- * @param {Boolean} nonInteraction      Optional: Don't consider as interaction for bounce rate calculation
  * @return {Object}                     Self reference (liquid interface)
  */
-tw_gat.trackEvent = function(category, action, label, value, nonInteraction) {
-    if (this._accountId) {
+tw_gat.trackEvent = function(category, action, label, value) {
+    if (this._createTracker()) {
         category                        = (category ? this.trim(category) : '') || '';
         action                          = (action ? this.trim(action) : '') || '';
         if (category.length && action.length) {
-            var evt                     = ['_trackEvent', category, action];
+            var evt                     = {'eventCategory': category, 'eventAction': action};
             if (arguments.length > 2) {
-                evt.push((label ? this.trim(label) : '') || '');
+            	evt.eventLabel			= (label ? this.trim(label) : '') || '';
                 if (arguments.length > 3) {
                     value               = parseInt(value);
-                    evt.push(isNaN(value) ? 0 : value);
-                    if (arguments.length > 4) {
-                        evt.push(!!nonInteraction);
-                    }
+                    evt.eventValue		= isNaN(value) ? 0 : value;
                 }
             }
             if (this._debug && console) {
-                var evtlog              = evt.slice(0);
-                evtlog.unshift('Google Analytics');
-                var cfunc               = (this._futureCustomVariables && console.group) ? 'group' : 'log';
-                
-                // IE console problems ...
-                // console[cfunc].apply(console, evtlog);
-                switch (evtlog.length) {
-                	case 3: console[cfunc](evtlog[0], evtlog[1], evtlog[2]); break;
-                    case 4: console[cfunc](evtlog[0], evtlog[1], evtlog[2], evtlog[3]); break;
-                    case 5: console[cfunc](evtlog[0], evtlog[1], evtlog[2], evtlog[3], evtlog[4]); break;
-                    default: console[cfunc](evtlog[0], evtlog[1], evtlog[2], evtlog[3], evtlog[4], evtlog[5]); break;
-                }
-                
+                console.log('Universal Analytics', 'send', 'event', evt);
             }
-            this.setCustomVariables();
             if (this._debug < 2) {
-                _gaq.push(evt);
-            }
-            if (this._debug && console && console.group && this._futureCustomVariables) {
-                console.groupEnd();
+                ga('send', 'event', evt);
             }
         }
     }
@@ -804,41 +635,22 @@ tw_gat.trackEvent = function(category, action, label, value, nonInteraction) {
  * @param {String} network              Social network name (e.g. Facebook, Twitter, LinkedIn)
  * @param {String} action               Social action (e.g. Like, Share, Tweet)
  * @param {String} target               Optional interaction target (e.g. an ID or the page title, which is the default if omitted)
- * @param {String} pagePath             Optional page path (document location if omitted)
  * @return {}
  */
-tw_gat.trackSocial = function(network, action, target, pagePath) {
-    if (this._accountId) {
+tw_gat.trackSocial = function(network, action, target) {
+    if (this._createTracker()) {
         network                         = (network ? this.trim(network) : '') || '';
         action                          = (action ? this.trim(action) : '') || '';
         if (network.length && action.length) {
-            var evt                     = ['_trackSocial', network, action];
+            var evt                     = {'socialNetwork': network, 'socialAction': action};
             if (arguments.length > 2) {
-                evt.push((target ? this.trim(target) : '') || '');
-                if (arguments.length > 3) {
-                    evt.push((pagePath ? this.trim(pagePath) : '') || '');
-                }
+            	evt.socialTarget		= (target ? this.trim(target) : '') || '';
             }
             if (this._debug && console) {
-                var evtlog              = evt.slice(0);
-                evtlog.unshift('Google Analytics');
-                var cfunc               = (this._futureCustomVariables && console.group) ? 'group' : 'log';
-                
-                // IE console problems ...
-                // console[cfunc].apply(console, evtlog);
-                switch (evtlog.length) {
-                    case 3: console[cfunc](evtlog[0], evtlog[1], evtlog[2], evtlog[3]); break;
-                    case 4: console[cfunc](evtlog[0], evtlog[1], evtlog[2], evtlog[3], evtlog[4]); break;
-                    default: console[cfunc](evtlog[0], evtlog[1], evtlog[2], evtlog[3], evtlog[4], evtlog[5]); break;
-                }
-                
+                console.log('Universal Analytics', 'send', 'social', evt);
             }
-            this.setCustomVariables();
             if (this._debug < 2) {
-                _gaq.push(evt);
-            }
-            if (this._debug && console && console.group && this._futureCustomVariables) {
-                console.groupEnd();
+                 ga('send', 'social', evt);
             }
         }
     }

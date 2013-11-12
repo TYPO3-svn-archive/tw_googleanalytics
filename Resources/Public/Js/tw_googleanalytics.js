@@ -266,6 +266,12 @@ tw_gat.setAccount = function(accountId) {
         console.log('Google Analytics', '_setAccount', this._accountId);
     }
     if (this._accountId && (this._debug < 2)) {
+    	if (document.cookie.indexOf('ga-disable-' + this._accountId + '=true') > -1) {
+    		if (this._debug && console) {
+		        console.log('Google Analytics', 'optOut', true);
+		    }
+			window['ga-disable-' + this._accountId] = true;
+		}
         _gaq.push(['_setAccount', this._accountId]);
     }
     return this;
@@ -805,7 +811,7 @@ tw_gat.trackEvent = function(category, action, label, value, nonInteraction) {
  * @param {String} action               Social action (e.g. Like, Share, Tweet)
  * @param {String} target               Optional interaction target (e.g. an ID or the page title, which is the default if omitted)
  * @param {String} pagePath             Optional page path (document location if omitted)
- * @return {}
+ * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.trackSocial = function(network, action, target, pagePath) {
     if (this._accountId) {
@@ -990,4 +996,25 @@ tw_gat._doTrackURL = function(e, url, form) {
         }
     }
     return true;
+}
+
+/**
+ * Opt-out of tracking by setting an opt-out cookie
+ * 
+ * @var {Boolean} out					Opt-out
+ * @return {Object}                     Self reference (liquid interface)
+ */
+tw_gat.optOut = function(out) {
+	out												= out || false;
+	if (this._debug && console) {
+        console.log('Google Analytics', 'optOut', out);
+    }
+	document.cookie									= 'ga-disable-' + this._accountId + '=' + (out ? 'true; expires=Thu, 31 Dec 2099 23:59:59 UTC' : '; expires=Thu, 01 Jan 1970 00:00:01 UTC') + '; path=/';
+	if (out) {
+		window['ga-disable-' + this._accountId]		= true;
+	} else {
+		window['ga-disable-' + this._accountId]		= false;
+		delete window['ga-disable-' + this._accountId];
+	}
+	return this;
 }

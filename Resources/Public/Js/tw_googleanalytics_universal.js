@@ -219,6 +219,12 @@ tw_gat.registerCustomDimensionsMetrics = function(customDimensionsMetrics) {
  */
 tw_gat.setAccount = function(accountId) {
     this._accountId         = this.trim(accountId);
+    if (document.cookie.indexOf('ga-disable-' + this._accountId + '=true') > -1) {
+    	if (this._debug && console) {
+	        console.log('Universal Analytics', 'optOut', true);
+	    }
+		window['ga-disable-' + this._accountId] = true;
+	}
     return this;
 }
 
@@ -264,7 +270,9 @@ tw_gat._createTracker = function() {
 		    }
 		}
 		if (this._anonymizeIP) {
-			console.log('Universal Analytics', 'set', 'anonymizeIp', true);
+			if (this._debug && console) {
+				console.log('Universal Analytics', 'set', 'anonymizeIp', true);
+			}
 			ga('set', 'anonymizeIp', true);
 		}
 	    this._created = true;
@@ -635,7 +643,7 @@ tw_gat.trackEvent = function(category, action, label, value) {
  * @param {String} network              Social network name (e.g. Facebook, Twitter, LinkedIn)
  * @param {String} action               Social action (e.g. Like, Share, Tweet)
  * @param {String} target               Optional interaction target (e.g. an ID or the page title, which is the default if omitted)
- * @return {}
+ * @return {Object}                     Self reference (liquid interface)
  */
 tw_gat.trackSocial = function(network, action, target) {
     if (this._createTracker()) {
@@ -802,4 +810,25 @@ tw_gat._doTrackURL = function(e, url, form) {
         }
     }
     return true;
+}
+
+/**
+ * Opt-out of tracking by setting an opt-out cookie
+ * 
+ * @var {Boolean} out					Opt-out
+ * @return {Object}                     Self reference (liquid interface)
+ */
+tw_gat.optOut = function(out) {
+	out												= out || false;
+	if (this._debug && console) {
+        console.log('Universal Analytics', 'optOut', out);
+    }
+	document.cookie									= 'ga-disable-' + this._accountId + '=' + (out ? 'true; expires=Thu, 31 Dec 2099 23:59:59 UTC' : '; expires=Thu, 01 Jan 1970 00:00:01 UTC') + '; path=/';
+	if (out) {
+		window['ga-disable-' + this._accountId]		= true;
+	} else {
+		window['ga-disable-' + this._accountId]		= false;
+		delete window['ga-disable-' + this._accountId];
+	}
+	return this;
 }
